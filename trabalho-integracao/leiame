@@ -1,0 +1,145 @@
+🚀 Tecnologias Utilizadas
+Tecnologia	Função
+FastAPI	API principal que integra todos os bancos
+PostgreSQL	Dados principais de clientes, produtos e compras
+MongoDB	Interesses, tags e comportamentos
+Neo4j	Rede social de clientes (amizades e indicações)
+Redis	Cache das recomendações
+Docker Compose	Orquestração dos serviços
+
+ESTRUTURA:
+.
+├── api/
+│   ├── app.py
+│   ├── Dockerfile
+│   └── requirements.txt
+├── docker-compose.yml
+└── README.md
+
+
+▶️ Como Executar o Projeto
+1. Instale o Docker Desktop
+
+https://www.docker.com/products/docker-desktop/
+
+2. Clone este repositório
+git clone https://github.com/BrenoHB/trabalhofinalBD2
+cd trabalho-integracao
+
+3. Suba todos os serviços
+docker compose up -d --build
+
+4. Acesse a API
+
+📌 Docs interativas (Swagger UI):
+
+👉 http://localhost:8000/docs
+
+📌 Health check da integração:
+
+👉 http://localhost:8000/health
+
+🗃️ Exemplos de Inserção de Dados
+
+A API depende de dados nos bancos. Aqui estão exemplos para popular cada base.
+
+🐘 PostgreSQL — Clientes, Produtos e Compras
+
+Acesse o container:
+
+docker exec -it db_postgres psql -U admin -d recomendador
+
+Inserção de dados:
+INSERT INTO clientes (cpf, nome, endereco, cidade, uf, email) VALUES
+('111.111.111-11', 'João Silva', 'Rua A, 100', 'Chapecó', 'SC', 'joao@example.com'),
+('222.222.222-22', 'Maria Souza', 'Rua B, 200', 'Chapecó', 'SC', 'maria@example.com'),
+('333.333.333-33', 'Carlos Lima', 'Rua C, 300', 'Florianópolis', 'SC', 'carlos@example.com');
+
+INSERT INTO produtos (produto, valor, quantidade, tipo) VALUES
+('Notebook Gamer', 5500.00, 10, 'Eletrônicos'),
+('Mouse Sem Fio', 120.00, 50, 'Periféricos'),
+('Teclado Mecânico', 320.00, 30, 'Periféricos');
+
+INSERT INTO compras (id_produto, data, id_cliente) VALUES
+(1, '2025-11-01', 1),
+(2, '2025-11-02', 1),
+(3, '2025-11-03', 2),
+(2, '2025-11-05', 3);
+
+🍃 MongoDB — Interesses do Cliente
+docker exec -it db_mongo mongosh
+
+use recomendador_docs;
+
+db.clientes_interesses.insertMany([
+  {
+    cliente_id: 1,
+    interesses: ["notebook", "gamer", "periféricos"],
+    tags_comportamento: ["visita_frequente"]
+  },
+  {
+    cliente_id: 2,
+    interesses: ["teclado mecânico"],
+    tags_comportamento: ["cliente_novo"]
+  },
+  {
+    cliente_id: 3,
+    interesses: ["mouse sem fio"],
+    tags_comportamento: ["abandono_carrinho"]
+  }
+]);
+
+🕸️ Neo4j — Grafo de Relacionamentos
+
+Acesse o painel:
+
+👉 http://localhost:7474
+
+Rode:
+
+MATCH (n) DETACH DELETE n;
+
+CREATE (c1:Cliente {id_cliente: 1, nome: 'João Silva'});
+CREATE (c2:Cliente {id_cliente: 2, nome: 'Maria Souza'});
+CREATE (c3:Cliente {id_cliente: 3, nome: 'Carlos Lima'});
+
+CREATE (c1)-[:AMIGO_DE]->(c2);
+CREATE (c2)-[:AMIGO_DE]->(c3);
+
+CREATE (c1)-[:INDICOU {produto: "Notebook Gamer"}]->(c3);
+
+⚡ Redis — Teste de Cache
+docker exec -it db_redis redis-cli
+
+SET teste "oi redis"
+GET teste
+
+🔥 Testando a API
+✔ Listar clientes
+GET http://localhost:8000/clientes
+
+✔ Detalhar cliente
+GET http://localhost:8000/clientes/1
+
+✔ Recomendações integradas (Postgres + Mongo + Neo4j + Redis)
+GET http://localhost:8000/recomendacoes/1
+
+
+Primeira resposta:
+
+{
+  "origem": "bancos",
+  "cliente": {...},
+  "compras": [...],
+  "interesses": [...],
+  "amigos": [...],
+  "indicacoes": [...]
+}
+
+
+Segunda resposta (cache):
+
+{
+  "origem": "cache_redis",
+  ...
+}
