@@ -1,0 +1,75 @@
+services:
+  # BASE 1: Relacional - PostgreSQL
+  postgres:
+    image: postgres:16
+    container_name: db_postgres
+    environment:
+      POSTGRES_DB: recomendador
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - integracao-net
+
+  # BASE 2: Documentos - MongoDB
+  mongo:
+    image: mongo:7
+    container_name: db_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - integracao-net
+
+  # BASE 3: Grafos - Neo4j
+  neo4j:
+    image: neo4j:5
+    container_name: db_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/senha123
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - integracao-net
+
+  # BASE 4: Chave-valor - Redis
+  redis:
+    image: redis:7
+    container_name: db_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - integracao-net
+
+  # API de integração
+  api:
+    build: ./api
+    container_name: api_app
+    depends_on:
+      - postgres
+      - mongo
+      - neo4j
+      - redis
+    ports:
+      - "8000:8000"
+    networks:
+      - integracao-net
+
+networks:
+  integracao-net:
+
+volumes:
+  postgres_data:
+  mongo_data:
+  neo4j_data:
+  redis_data:
