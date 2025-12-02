@@ -95,6 +95,9 @@ Acesse o painel:
 
 👉 http://localhost:7474
 
+Usuário: neo4j 
+Senha: senha123
+
 Rode:
 
 MATCH (n) DETACH DELETE n;
