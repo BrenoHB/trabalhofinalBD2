@@ -49,6 +49,35 @@ Acesse o container:
 
 docker exec -it db_postgres psql -U admin -d recomendador
 
+Criar Tabelas:
+CREATE TABLE clientes (
+    id SERIAL PRIMARY KEY,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    endereco VARCHAR(200),
+    cidade VARCHAR(100),
+    uf CHAR(2),
+    email VARCHAR(120)
+);
+
+CREATE TABLE produtos (
+    id SERIAL PRIMARY KEY,
+    produto VARCHAR(120) NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    quantidade INT NOT NULL,
+    tipo VARCHAR(80)
+);
+
+CREATE TABLE compras (
+    id SERIAL PRIMARY KEY,
+    id_produto INT NOT NULL,
+    data DATE NOT NULL,
+    id_cliente INT NOT NULL,
+    FOREIGN KEY (id_produto) REFERENCES produtos(id),
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id)
+);
+
+
 Inserção de dados:
 INSERT INTO clientes (cpf, nome, endereco, cidade, uf, email) VALUES
 ('111.111.111-11', 'João Silva', 'Rua A, 100', 'Chapecó', 'SC', 'joao@example.com'),
